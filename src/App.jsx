@@ -50,6 +50,15 @@ export default function App() {
     }
     return "light";
   });
+  const [fontScale, setFontScale] = useState(() => {
+    try {
+      const saved = parseFloat(localStorage.getItem("ui-font-scale"));
+      if (saved === 0.9 || saved === 1 || saved === 1.15) return saved;
+    } catch {
+      // ignore
+    }
+    return 1;
+  });
   const ui = useMemo(() => getUiLabels(lang), [lang]);
   const [status, setStatus] = useState(ui.statusReady);
   const [pdfUrl, setPdfUrl] = useState(null);
@@ -89,6 +98,19 @@ export default function App() {
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
   }, [theme]);
+
+  useEffect(() => {
+    document.documentElement.style.setProperty("--font-scale", String(fontScale));
+  }, [fontScale]);
+
+  const changeFontScale = (next) => {
+    setFontScale(next);
+    try {
+      localStorage.setItem("ui-font-scale", String(next));
+    } catch {
+      // ignore
+    }
+  };
 
   useEffect(() => {
     return () => {
@@ -218,12 +240,42 @@ export default function App() {
   return (
     <div className="page">
       <header className="header">
-        <div className="header__controls">
+        <div className="header__controls" role="toolbar" aria-label="Display settings">
+          <div className="font-toggle" role="group" aria-label="Text size">
+            <button
+              type="button"
+              className="font-toggle__btn"
+              onClick={() => changeFontScale(0.9)}
+              aria-label="Decrease text size"
+              aria-pressed={fontScale === 0.9}
+            >
+              A−
+            </button>
+            <button
+              type="button"
+              className="font-toggle__btn font-toggle__btn--mid"
+              onClick={() => changeFontScale(1)}
+              aria-label="Default text size"
+              aria-pressed={fontScale === 1}
+            >
+              A
+            </button>
+            <button
+              type="button"
+              className="font-toggle__btn font-toggle__btn--big"
+              onClick={() => changeFontScale(1.15)}
+              aria-label="Increase text size"
+              aria-pressed={fontScale === 1.15}
+            >
+              A+
+            </button>
+          </div>
           <button
             type="button"
             className="pill-toggle"
             onClick={toggleTheme}
             aria-label={theme === "dark" ? ui.themeToggleAriaLight : ui.themeToggleAriaDark}
+            aria-pressed={theme === "dark"}
           >
             {theme === "dark" ? ui.themeToLight : ui.themeToDark}
           </button>
@@ -232,6 +284,7 @@ export default function App() {
             className="pill-toggle"
             onClick={toggleLang}
             aria-label={ui.langToggleAria}
+            aria-pressed={lang === "en"}
           >
             {ui.langToggle}
           </button>
@@ -243,18 +296,18 @@ export default function App() {
       </header>
 
       <main className="content">
-        <section className="card">
-          <div className="addressed">
-            <div className="addressed__label">{ui.addressedToLabel}</div>
+        <section className="card" aria-labelledby="addressed-label">
+          <address className="addressed">
+            <div className="addressed__label" id="addressed-label">{ui.addressedToLabel}</div>
             <div className="addressed__value">
               {ui.addressedToValue.split("\n").map((line, i) => (
                 <div key={i}>{line}</div>
               ))}
             </div>
-          </div>
+          </address>
         </section>
 
-        <section className="card intro">
+        <section className="card intro" aria-label={ui.introSalutation}>
           <p className="intro__salutation">{ui.introSalutation}</p>
           <p className="intro__body">{ui.introBody}</p>
         </section>
@@ -262,18 +315,20 @@ export default function App() {
         <form
           className="form"
           noValidate
+          aria-label={`${ui.headingLine1} ${ui.headingLine2}`}
+          aria-busy={busy}
           onSubmit={(e) => {
             e.preventDefault();
             handleGenerate();
           }}
         >
-          <section className="card">
-            <h2 className="section-title">{ui.applicantSectionTitle}</h2>
+          <section className="card" aria-labelledby="applicant-section-title">
+            <h2 className="section-title" id="applicant-section-title">{ui.applicantSectionTitle}</h2>
 
             <div className="grid">
               <div className="field">
                 <label htmlFor="applicantName">
-                  {ui.applicantName} <span className="req">*</span>
+                  {ui.applicantName} <span className="req" aria-hidden="true">*</span>
                 </label>
                 <input
                   id="applicantName"
@@ -282,6 +337,7 @@ export default function App() {
                   value={form.applicantName}
                   onChange={update("applicantName")}
                   required
+                  aria-required="true"
                 />
               </div>
               <div className="field field--split">
@@ -301,27 +357,34 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="field field--full">
-                <label>
-                  {ui.address} <span className="req">*</span>
-                </label>
+              <div className="field field--full" role="group" aria-labelledby="address-label">
+                <span className="field__legend" id="address-label">
+                  {ui.address} <span className="req" aria-hidden="true">*</span>
+                </span>
                 <div className="stack">
                   <input
                     type="text"
                     placeholder={ui.addressLine1Placeholder}
+                    aria-label={ui.addressLine1Placeholder}
+                    autoComplete="address-line1"
                     value={form.addressLine1}
                     onChange={update("addressLine1")}
                     required
+                    aria-required="true"
                   />
                   <input
                     type="text"
                     placeholder={ui.addressLine2Placeholder}
+                    aria-label={ui.addressLine2Placeholder}
+                    autoComplete="address-line2"
                     value={form.addressLine2}
                     onChange={update("addressLine2")}
                   />
                   <input
                     type="text"
                     placeholder={ui.addressLine3Placeholder}
+                    aria-label={ui.addressLine3Placeholder}
+                    autoComplete="address-line3"
                     value={form.addressLine3}
                     onChange={update("addressLine3")}
                   />
@@ -330,7 +393,7 @@ export default function App() {
 
               <div className="field">
                 <label htmlFor="phone">
-                  {ui.phone} <span className="req">*</span>
+                  {ui.phone} <span className="req" aria-hidden="true">*</span>
                 </label>
                 <input
                   id="phone"
@@ -340,6 +403,7 @@ export default function App() {
                   value={form.phone}
                   onChange={update("phone")}
                   required
+                  aria-required="true"
                 />
               </div>
 
@@ -357,12 +421,12 @@ export default function App() {
             </div>
           </section>
 
-          <section className="card">
-            <h2 className="section-title">{ui.requestSectionTitle}</h2>
+          <section className="card" aria-labelledby="request-section-title">
+            <h2 className="section-title" id="request-section-title">{ui.requestSectionTitle}</h2>
             <div className="grid">
               <div className="field">
                 <label htmlFor="requestedRegNumber">
-                  {ui.requestedRegNumber} <span className="req">*</span>
+                  {ui.requestedRegNumber} <span className="req" aria-hidden="true">*</span>
                 </label>
                 <input
                   id="requestedRegNumber"
@@ -373,12 +437,17 @@ export default function App() {
                   onFocus={handleRegNumberFocus}
                   onBlur={handleRegNumberBlur}
                   required
+                  aria-required="true"
+                  aria-describedby="requestedRegNumber-hint"
                 />
+                <span id="requestedRegNumber-hint" className="sr-only">
+                  Format: KA followed by two digits, two letters, four digits. Example: KA 51 AA 1111.
+                </span>
               </div>
 
               <div className="field">
                 <label htmlFor="rtoOfficeName">
-                  {ui.rtoOfficeName} <span className="req">*</span>
+                  {ui.rtoOfficeName} <span className="req" aria-hidden="true">*</span>
                 </label>
                 <input
                   id="rtoOfficeName"
@@ -386,14 +455,15 @@ export default function App() {
                   value={form.rtoOfficeName}
                   onChange={update("rtoOfficeName")}
                   required
+                  aria-required="true"
                 />
               </div>
             </div>
           </section>
 
-          <section className="card">
-            <h2 className="section-title">{ui.documentsTitle}</h2>
-            <div className="checks">
+          <section className="card" aria-labelledby="documents-title">
+            <h2 className="section-title" id="documents-title">{ui.documentsTitle}</h2>
+            <div className="checks" role="group" aria-labelledby="documents-title">
               <label className="check">
                 <input type="checkbox" checked={form.docForm21} onChange={update("docForm21")} />
                 <span>{ui.docForm21}</span>
@@ -409,8 +479,8 @@ export default function App() {
             </div>
           </section>
 
-          <section className="card">
-            <h2 className="section-title">{ui.paymentTitle}</h2>
+          <section className="card" aria-labelledby="payment-title">
+            <h2 className="section-title" id="payment-title">{ui.paymentTitle}</h2>
             <div className="grid">
               <div className="field">
                 <label htmlFor="vehicleNumber">{ui.vehicleNumber}</label>
@@ -460,28 +530,28 @@ export default function App() {
             </div>
           </section>
 
-          <section className="card">
-            <h2 className="section-title">{ui.declarationTitle}</h2>
+          <section className="card" aria-labelledby="declaration-title">
+            <h2 className="section-title" id="declaration-title">{ui.declarationTitle}</h2>
             <p className="declaration">{ui.declarationText}</p>
 
             <div className="grid">
               <div className="field">
                 <label htmlFor="place">
-                  {ui.place} <span className="req">*</span>
+                  {ui.place} <span className="req" aria-hidden="true">*</span>
                 </label>
-                <input id="place" type="text" value={form.place} onChange={update("place")} required />
+                <input id="place" type="text" value={form.place} onChange={update("place")} required aria-required="true" />
               </div>
 
               <div className="field">
                 <label htmlFor="date">
-                  {ui.date} <span className="req">*</span>
+                  {ui.date} <span className="req" aria-hidden="true">*</span>
                 </label>
-                <input id="date" type="date" value={form.date} onChange={update("date")} required />
+                <input id="date" type="date" value={form.date} onChange={update("date")} required aria-required="true" />
               </div>
 
               <div className="field">
                 <label htmlFor="signatureName">
-                  {ui.signatureName} <span className="req">*</span>
+                  {ui.signatureName} <span className="req" aria-hidden="true">*</span>
                 </label>
                 <input
                   id="signatureName"
@@ -489,13 +559,14 @@ export default function App() {
                   value={form.signatureName}
                   onChange={handleSignatureChange}
                   required
+                  aria-required="true"
                 />
               </div>
             </div>
           </section>
 
-          <section className="card actions">
-            <div className="actions__row">
+          <section className="card actions" aria-label="Form actions">
+            <div className="actions__row" role="group" aria-label="Form actions">
               <button
                 type="submit"
                 className="btn btn--primary"
