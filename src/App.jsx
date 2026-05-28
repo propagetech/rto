@@ -140,15 +140,40 @@ export default function App() {
     setForm((prev) => ({ ...prev, signatureName: e.target.value.toUpperCase() }));
   };
 
-  const handleRegSegmentChange = (segment, maxLen, kind, nextId) => (e) => {
-    const allowed = kind === "digit" ? /[^0-9]/g : /[^A-Z]/g;
-    let val = e.target.value.toUpperCase().replace(allowed, "").slice(0, maxLen);
+  const handleRegDistrictChange = (e) => {
+    const raw = e.target.value.toUpperCase();
+    const digits = raw.replace(/[^0-9]/g, "").slice(0, 2);
+    const letters = raw.replace(/[^A-Z]/g, "");
     lastBlobRef.current = null;
-    setForm((prev) => ({ ...prev, [segment]: val }));
-    if (val.length === maxLen && nextId) {
-      const next = document.getElementById(nextId);
-      if (next) next.focus();
+    setForm((prev) => {
+      const next = { ...prev, regDistrict: digits };
+      if (letters) next.regSeries = (prev.regSeries + letters).slice(0, 2);
+      return next;
+    });
+    if (digits.length === 2 || letters) {
+      document.getElementById("regSeries")?.focus();
     }
+  };
+
+  const handleRegSeriesChange = (e) => {
+    const raw = e.target.value.toUpperCase();
+    const letters = raw.replace(/[^A-Z]/g, "").slice(0, 2);
+    const digits = raw.replace(/[^0-9]/g, "");
+    lastBlobRef.current = null;
+    setForm((prev) => {
+      const next = { ...prev, regSeries: letters };
+      if (digits) next.regUnique = (prev.regUnique + digits).slice(0, 4);
+      return next;
+    });
+    if (letters.length === 2 || digits) {
+      document.getElementById("regUnique")?.focus();
+    }
+  };
+
+  const handleRegUniqueChange = (e) => {
+    const digits = e.target.value.replace(/[^0-9]/g, "").slice(0, 4);
+    lastBlobRef.current = null;
+    setForm((prev) => ({ ...prev, regUnique: digits }));
   };
 
   const handleRegSegmentKeyDown = (prevId) => (e) => {
@@ -447,7 +472,7 @@ export default function App() {
                     placeholder="51"
                     aria-label="District code, two digits"
                     value={form.regDistrict}
-                    onChange={handleRegSegmentChange("regDistrict", 2, "digit", "regSeries")}
+                    onChange={handleRegDistrictChange}
                     onKeyDown={handleRegSegmentKeyDown(null)}
                     required
                     aria-required="true"
@@ -462,7 +487,7 @@ export default function App() {
                     placeholder="AA"
                     aria-label="Series code, one or two letters"
                     value={form.regSeries}
-                    onChange={handleRegSegmentChange("regSeries", 2, "alpha", "regUnique")}
+                    onChange={handleRegSeriesChange}
                     onKeyDown={handleRegSegmentKeyDown("regDistrict")}
                     required
                     aria-required="true"
@@ -478,7 +503,7 @@ export default function App() {
                     placeholder="1234"
                     aria-label="Unique number, four digits"
                     value={form.regUnique}
-                    onChange={handleRegSegmentChange("regUnique", 4, "digit", null)}
+                    onChange={handleRegUniqueChange}
                     onKeyDown={handleRegSegmentKeyDown("regSeries")}
                     required
                     aria-required="true"
