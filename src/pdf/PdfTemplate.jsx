@@ -1,5 +1,5 @@
 import { forwardRef } from "react";
-import { LABELS } from "../labels.js";
+import { LABELS, placeForPdf } from "../labels.js";
 
 function valueOrBlank(v) {
   const s = String(v ?? "").trim();
@@ -11,6 +11,11 @@ const PdfTemplate = forwardRef(function PdfTemplate({ form }, ref) {
     form.relationType && form.relationName
       ? `${form.relationType} ${form.relationName}`
       : form.relationName || "";
+
+  const vehicleClassDisplay =
+    form.vehicleClass === "OTH" && form.vehicleClassOther
+      ? form.vehicleClassOther
+      : form.vehicleClass;
 
   return (
     <div ref={ref} className="pdf-doc">
@@ -79,7 +84,7 @@ const PdfTemplate = forwardRef(function PdfTemplate({ form }, ref) {
           <tbody>
             <tr>
               <td>{valueOrBlank(form.vehicleNumber)}</td>
-              <td>{valueOrBlank(form.vehicleClass)}</td>
+              <td>{valueOrBlank(vehicleClassDisplay)}</td>
               <td>{valueOrBlank(form.amount)}</td>
               <td>{valueOrBlank(form.ddNumber)}</td>
               <td>{valueOrBlank(form.bankName)}</td>
@@ -96,7 +101,7 @@ const PdfTemplate = forwardRef(function PdfTemplate({ form }, ref) {
       <div className="pdf-footer">
         <div className="pdf-footer__row">
           <span className="pdf-footer__label">{LABELS.place} :</span>
-          <span className="pdf-footer__value">{form.place}</span>
+          <span className="pdf-footer__value">{placeForPdf(form.place)}</span>
         </div>
         <div className="pdf-footer__row">
           <span className="pdf-footer__label">{LABELS.date} :</span>

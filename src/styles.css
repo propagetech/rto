@@ -1,12 +1,28 @@
-:root {
+:root,
+[data-theme="light"] {
   --bg: #f6f7fb;
   --card: #ffffff;
+  --input-bg: #ffffff;
   --text: #0f172a;
   --muted: #475569;
   --border: #d8dee9;
   --primary: #1d4ed8;
+  --primary-contrast: #ffffff;
   --danger: #b91c1c;
   --shadow: 0 10px 25px rgba(2, 6, 23, 0.08);
+}
+
+[data-theme="dark"] {
+  --bg: #0b1220;
+  --card: #131c2e;
+  --input-bg: #0f1626;
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --border: #2a3650;
+  --primary: #60a5fa;
+  --primary-contrast: #0b1220;
+  --danger: #f87171;
+  --shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
 }
 
 * {
@@ -34,6 +50,39 @@ body {
 
 .header {
   margin-bottom: 16px;
+  position: relative;
+}
+
+.header__controls {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  gap: 8px;
+}
+
+.pill-toggle {
+  appearance: none;
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 6px 12px;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+}
+
+.pill-toggle:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.pill-toggle:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
 
 .scan-title {
@@ -127,7 +176,19 @@ body {
   border-radius: 12px;
   font: inherit;
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial;
-  background: #fff;
+  background: var(--input-bg);
+  color: var(--text);
+  color-scheme: light dark;
+}
+
+.field input::placeholder {
+  color: var(--muted);
+  opacity: 0.7;
+}
+
+.field input[type="text"],
+.field input[type="tel"] {
+  text-transform: uppercase;
 }
 
 .field input:focus,
@@ -161,12 +222,22 @@ body {
 .check {
   display: flex;
   gap: 10px;
-  align-items: flex-start;
+  align-items: center;
   user-select: none;
+  line-height: 1.4;
 }
 
-.check input {
-  transform: translateY(3px);
+.check input[type="checkbox"] {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.check span {
+  flex: 1;
 }
 
 .declaration {
@@ -189,7 +260,7 @@ body {
 .btn {
   appearance: none;
   border: 1px solid var(--border);
-  background: #fff;
+  background: var(--card);
   color: var(--text);
   padding: 10px 16px;
   border-radius: 12px;
@@ -206,7 +277,7 @@ body {
 .btn--primary {
   border-color: transparent;
   background: var(--primary);
-  color: #fff;
+  color: var(--primary-contrast);
 }
 
 .btn--whatsapp {

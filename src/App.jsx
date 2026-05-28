@@ -1,10 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  AMOUNT_OPTIONS,
+  buildPdfFileName,
   buildShareMessage,
+  getUiLabels,
   INITIAL_FORM,
-  LABELS,
+  REG_NUMBER_PLACEHOLDER,
   RELATION_OPTIONS,
   REQUIRED_FIELDS,
+  UPPERCASE_FIELDS,
+  VEHICLE_CLASS_OPTIONS,
   WHATSAPP_TARGET
 } from "./labels.js";
 import { generatePdfFromElement } from "./pdf/generatePdf.js";
@@ -25,12 +30,64 @@ function isComplete(form) {
 
 export default function App() {
   const [form, setForm] = useState(() => ({ ...INITIAL_FORM, date: todayISODate() }));
-  const [status, setStatus] = useState(LABELS.statusReady);
+  const [lang, setLang] = useState(() => {
+    try {
+      return localStorage.getItem("ui-lang") === "en" ? "en" : "kn";
+    } catch {
+      return "kn";
+    }
+  });
+  const [theme, setTheme] = useState(() => {
+    try {
+      const saved = localStorage.getItem("ui-theme");
+      if (saved === "dark" || saved === "light") return saved;
+    } catch {
+      // ignore
+    }
+    if (typeof window !== "undefined" && window.matchMedia?.("(prefers-color-scheme: dark)").matches) {
+      return "dark";
+    }
+    return "light";
+  });
+  const ui = useMemo(() => getUiLabels(lang), [lang]);
+  const [status, setStatus] = useState(ui.statusReady);
   const [pdfUrl, setPdfUrl] = useState(null);
   const [busy, setBusy] = useState(false);
   const lastBlobRef = useRef(null);
   const sigTouchedRef = useRef(false);
   const templateRef = useRef(null);
+
+  const toggleLang = () => {
+    setLang((prev) => {
+      const next = prev === "en" ? "kn" : "en";
+      try {
+        localStorage.setItem("ui-lang", next);
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+  };
+
+  const toggleTheme = () => {
+    setTheme((prev) => {
+      const next = prev === "dark" ? "light" : "dark";
+      try {
+        localStorage.setItem("ui-theme", next);
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    document.documentElement.lang = lang === "en" ? "en" : "kn";
+  }, [lang]);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
 
   useEffect(() => {
     return () => {
@@ -39,7 +96,10 @@ export default function App() {
   }, [pdfUrl]);
 
   const update = (key) => (e) => {
-    const value = e.target.type === "checkbox" ? e.target.checked : e.target.value;
+    let value = e.target.type === "checkbox" ? e.target.checked : e.target.value;
+    if (typeof value === "string" && UPPERCASE_FIELDS.has(key)) {
+      value = value.toUpperCase();
+    }
     lastBlobRef.current = null;
     setForm((prev) => {
       const next = { ...prev, [key]: value };
@@ -53,7 +113,7 @@ export default function App() {
   const handleSignatureChange = (e) => {
     sigTouchedRef.current = true;
     lastBlobRef.current = null;
-    setForm((prev) => ({ ...prev, signatureName: e.target.value }));
+    setForm((prev) => ({ ...prev, signatureName: e.target.value.toUpperCase() }));
   };
 
   const canGenerate = useMemo(() => isComplete(form), [form]);
@@ -61,17 +121,17 @@ export default function App() {
   const ensureBlob = async () => {
     if (lastBlobRef.current) return lastBlobRef.current;
     if (!isComplete(form)) {
-      setStatus(LABELS.statusMissing);
+      setStatus(ui.statusMissing);
       return null;
     }
     setBusy(true);
-    setStatus(LABELS.statusGenerating);
+    setStatus(ui.statusGenerating);
     try {
       const blob = await generatePdfFromElement(templateRef.current);
       lastBlobRef.current = blob;
       if (pdfUrl) URL.revokeObjectURL(pdfUrl);
       setPdfUrl(URL.createObjectURL(blob));
-      setStatus(LABELS.statusGenerated);
+      setStatus(ui.statusGenerated);
       return blob;
     } catch (err) {
       setStatus(String(err?.message || err));
@@ -83,7 +143,7 @@ export default function App() {
 
   const handleGenerate = async () => {
     if (!isComplete(form)) {
-      setStatus(LABELS.statusMissing);
+      setStatus(ui.statusMissing);
       return;
     }
     lastBlobRef.current = null;
@@ -94,7 +154,7 @@ export default function App() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = LABELS.pdfFileName;
+    a.download = buildPdfFileName(form);
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -111,19 +171,19 @@ export default function App() {
     const blob = await ensureBlob();
     if (!blob) return;
 
-    const file = new File([blob], LABELS.pdfFileName, { type: "application/pdf" });
+    const file = new File([blob], buildPdfFileName(form), { type: "application/pdf" });
     const message = buildShareMessage(form);
-    const shareData = { files: [file], title: LABELS.shareTitle, text: message };
+    const shareData = { files: [file], title: ui.shareTitle, text: message };
 
     if (typeof navigator !== "undefined" && navigator.canShare && navigator.canShare(shareData)) {
       try {
-        setStatus(LABELS.statusSharing);
+        setStatus(ui.statusSharing);
         await navigator.share(shareData);
-        setStatus(LABELS.statusGenerated);
+        setStatus(ui.statusGenerated);
         return;
       } catch (err) {
         if (err?.name === "AbortError") {
-          setStatus(LABELS.statusGenerated);
+          setStatus(ui.statusGenerated);
           return;
         }
         // fall through to fallback
@@ -133,24 +193,42 @@ export default function App() {
     downloadBlob(blob);
     const waUrl = `https://wa.me/${WHATSAPP_TARGET}?text=${encodeURIComponent(message)}`;
     window.open(waUrl, "_blank", "noopener,noreferrer");
-    setStatus(LABELS.statusShareFallback);
+    setStatus(ui.statusShareFallback);
   };
 
   return (
     <div className="page">
       <header className="header">
+        <div className="header__controls">
+          <button
+            type="button"
+            className="pill-toggle"
+            onClick={toggleTheme}
+            aria-label={theme === "dark" ? ui.themeToggleAriaLight : ui.themeToggleAriaDark}
+          >
+            {theme === "dark" ? ui.themeToLight : ui.themeToDark}
+          </button>
+          <button
+            type="button"
+            className="pill-toggle"
+            onClick={toggleLang}
+            aria-label={ui.langToggleAria}
+          >
+            {ui.langToggle}
+          </button>
+        </div>
         <h1 className="scan-title">
-          <span className="scan-title__line">{LABELS.headingLine1}</span>
-          <span className="scan-title__line">{LABELS.headingLine2}</span>
+          <span className="scan-title__line">{ui.headingLine1}</span>
+          <span className="scan-title__line">{ui.headingLine2}</span>
         </h1>
       </header>
 
       <main className="content">
         <section className="card">
           <div className="addressed">
-            <div className="addressed__label">{LABELS.addressedToLabel}</div>
+            <div className="addressed__label">{ui.addressedToLabel}</div>
             <div className="addressed__value">
-              {LABELS.addressedToValue.split("\n").map((line, i) => (
+              {ui.addressedToValue.split("\n").map((line, i) => (
                 <div key={i}>{line}</div>
               ))}
             </div>
@@ -158,8 +236,8 @@ export default function App() {
         </section>
 
         <section className="card intro">
-          <p className="intro__salutation">{LABELS.introSalutation}</p>
-          <p className="intro__body">{LABELS.introBody}</p>
+          <p className="intro__salutation">{ui.introSalutation}</p>
+          <p className="intro__body">{ui.introBody}</p>
         </section>
 
         <form
@@ -171,12 +249,12 @@ export default function App() {
           }}
         >
           <section className="card">
-            <h2 className="section-title">{LABELS.applicantSectionTitle}</h2>
+            <h2 className="section-title">{ui.applicantSectionTitle}</h2>
 
             <div className="grid">
               <div className="field">
                 <label htmlFor="applicantName">
-                  {LABELS.applicantName} <span className="req">*</span>
+                  {ui.applicantName} <span className="req">*</span>
                 </label>
                 <input
                   id="applicantName"
@@ -189,7 +267,7 @@ export default function App() {
               </div>
               <div className="field field--split">
                 <div>
-                  <label htmlFor="relationType">{LABELS.relationType}</label>
+                  <label htmlFor="relationType">{ui.relationType}</label>
                   <select id="relationType" value={form.relationType} onChange={update("relationType")}>
                     {RELATION_OPTIONS.map((opt) => (
                       <option key={opt.value} value={opt.value}>
@@ -199,32 +277,32 @@ export default function App() {
                   </select>
                 </div>
                 <div>
-                  <label htmlFor="relationName">{LABELS.relationName}</label>
+                  <label htmlFor="relationName">{ui.relationName}</label>
                   <input id="relationName" type="text" value={form.relationName} onChange={update("relationName")} />
                 </div>
               </div>
 
               <div className="field field--full">
                 <label>
-                  {LABELS.address} <span className="req">*</span>
+                  {ui.address} <span className="req">*</span>
                 </label>
                 <div className="stack">
                   <input
                     type="text"
-                    placeholder={LABELS.addressLine1Placeholder}
+                    placeholder={ui.addressLine1Placeholder}
                     value={form.addressLine1}
                     onChange={update("addressLine1")}
                     required
                   />
                   <input
                     type="text"
-                    placeholder={LABELS.addressLine2Placeholder}
+                    placeholder={ui.addressLine2Placeholder}
                     value={form.addressLine2}
                     onChange={update("addressLine2")}
                   />
                   <input
                     type="text"
-                    placeholder={LABELS.addressLine3Placeholder}
+                    placeholder={ui.addressLine3Placeholder}
                     value={form.addressLine3}
                     onChange={update("addressLine3")}
                   />
@@ -233,7 +311,7 @@ export default function App() {
 
               <div className="field">
                 <label htmlFor="phone">
-                  {LABELS.phone} <span className="req">*</span>
+                  {ui.phone} <span className="req">*</span>
                 </label>
                 <input
                   id="phone"
@@ -247,7 +325,7 @@ export default function App() {
               </div>
 
               <div className="field">
-                <label htmlFor="email">{LABELS.email}</label>
+                <label htmlFor="email">{ui.email}</label>
                 <input
                   id="email"
                   type="email"
@@ -261,15 +339,16 @@ export default function App() {
           </section>
 
           <section className="card">
-            <h2 className="section-title">{LABELS.requestSectionTitle}</h2>
+            <h2 className="section-title">{ui.requestSectionTitle}</h2>
             <div className="grid">
               <div className="field">
                 <label htmlFor="requestedRegNumber">
-                  {LABELS.requestedRegNumber} <span className="req">*</span>
+                  {ui.requestedRegNumber} <span className="req">*</span>
                 </label>
                 <input
                   id="requestedRegNumber"
                   type="text"
+                  placeholder={REG_NUMBER_PLACEHOLDER}
                   value={form.requestedRegNumber}
                   onChange={update("requestedRegNumber")}
                   required
@@ -278,7 +357,7 @@ export default function App() {
 
               <div className="field">
                 <label htmlFor="rtoOfficeName">
-                  {LABELS.rtoOfficeName} <span className="req">*</span>
+                  {ui.rtoOfficeName} <span className="req">*</span>
                 </label>
                 <input
                   id="rtoOfficeName"
@@ -292,79 +371,96 @@ export default function App() {
           </section>
 
           <section className="card">
-            <h2 className="section-title">{LABELS.documentsTitle}</h2>
+            <h2 className="section-title">{ui.documentsTitle}</h2>
             <div className="checks">
               <label className="check">
                 <input type="checkbox" checked={form.docForm21} onChange={update("docForm21")} />
-                <span>{LABELS.docForm21}</span>
+                <span>{ui.docForm21}</span>
               </label>
               <label className="check">
                 <input type="checkbox" checked={form.docForm23} onChange={update("docForm23")} />
-                <span>{LABELS.docForm23}</span>
+                <span>{ui.docForm23}</span>
               </label>
               <label className="check">
                 <input type="checkbox" checked={form.docRcOther} onChange={update("docRcOther")} />
-                <span>{LABELS.docRcOther}</span>
+                <span>{ui.docRcOther}</span>
               </label>
             </div>
           </section>
 
           <section className="card">
-            <h2 className="section-title">{LABELS.paymentTitle}</h2>
+            <h2 className="section-title">{ui.paymentTitle}</h2>
             <div className="grid">
               <div className="field">
-                <label htmlFor="vehicleNumber">{LABELS.vehicleNumber}</label>
+                <label htmlFor="vehicleNumber">{ui.vehicleNumber}</label>
                 <input id="vehicleNumber" type="text" value={form.vehicleNumber} onChange={update("vehicleNumber")} />
               </div>
               <div className="field">
-                <label htmlFor="vehicleClass">{LABELS.vehicleClass}</label>
-                <input id="vehicleClass" type="text" value={form.vehicleClass} onChange={update("vehicleClass")} />
+                <label htmlFor="vehicleClass">{ui.vehicleClass}</label>
+                <select id="vehicleClass" value={form.vehicleClass} onChange={update("vehicleClass")}>
+                  {VEHICLE_CLASS_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {form.vehicleClass === "OTH" ? (
+                <div className="field">
+                  <label htmlFor="vehicleClassOther">{ui.vehicleClassOther}</label>
+                  <input
+                    id="vehicleClassOther"
+                    type="text"
+                    placeholder={ui.vehicleClassOtherPlaceholder}
+                    value={form.vehicleClassOther}
+                    onChange={update("vehicleClassOther")}
+                    autoFocus
+                  />
+                </div>
+              ) : null}
+              <div className="field">
+                <label htmlFor="amount">{ui.amount}</label>
+                <select id="amount" value={form.amount} onChange={update("amount")}>
+                  {AMOUNT_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="field">
-                <label htmlFor="amount">{LABELS.amount}</label>
-                <input
-                  id="amount"
-                  type="number"
-                  inputMode="decimal"
-                  min="0"
-                  step="0.01"
-                  value={form.amount}
-                  onChange={update("amount")}
-                />
-              </div>
-              <div className="field">
-                <label htmlFor="ddNumber">{LABELS.ddNumber}</label>
+                <label htmlFor="ddNumber">{ui.ddNumber}</label>
                 <input id="ddNumber" type="text" value={form.ddNumber} onChange={update("ddNumber")} />
               </div>
               <div className="field">
-                <label htmlFor="bankName">{LABELS.bankName}</label>
+                <label htmlFor="bankName">{ui.bankName}</label>
                 <input id="bankName" type="text" value={form.bankName} onChange={update("bankName")} />
               </div>
             </div>
           </section>
 
           <section className="card">
-            <h2 className="section-title">{LABELS.declarationTitle}</h2>
-            <p className="declaration">{LABELS.declarationText}</p>
+            <h2 className="section-title">{ui.declarationTitle}</h2>
+            <p className="declaration">{ui.declarationText}</p>
 
             <div className="grid">
               <div className="field">
                 <label htmlFor="place">
-                  {LABELS.place} <span className="req">*</span>
+                  {ui.place} <span className="req">*</span>
                 </label>
                 <input id="place" type="text" value={form.place} onChange={update("place")} required />
               </div>
 
               <div className="field">
                 <label htmlFor="date">
-                  {LABELS.date} <span className="req">*</span>
+                  {ui.date} <span className="req">*</span>
                 </label>
                 <input id="date" type="date" value={form.date} onChange={update("date")} required />
               </div>
 
               <div className="field">
                 <label htmlFor="signatureName">
-                  {LABELS.signatureName} <span className="req">*</span>
+                  {ui.signatureName} <span className="req">*</span>
                 </label>
                 <input
                   id="signatureName"
@@ -383,9 +479,9 @@ export default function App() {
                 type="submit"
                 className="btn btn--primary"
                 disabled={busy || !canGenerate}
-                title={canGenerate ? "" : LABELS.statusMissing}
+                title={canGenerate ? "" : ui.statusMissing}
               >
-                {LABELS.generatePdf}
+                {ui.generatePdf}
               </button>
               <button
                 type="button"
@@ -393,7 +489,7 @@ export default function App() {
                 onClick={handleDownload}
                 disabled={busy || (!lastBlobRef.current && !canGenerate)}
               >
-                {LABELS.downloadPdf}
+                {ui.downloadPdf}
               </button>
               <button
                 type="button"
@@ -401,7 +497,7 @@ export default function App() {
                 onClick={handleShareWhatsapp}
                 disabled={busy || (!lastBlobRef.current && !canGenerate)}
               >
-                {LABELS.sendWhatsapp}
+                {ui.sendWhatsapp}
               </button>
             </div>
             <div className="status" role="status" aria-live="polite">
@@ -412,7 +508,7 @@ export default function App() {
 
         {pdfUrl ? (
           <section className="card preview">
-            <h2 className="section-title">{LABELS.previewTitle}</h2>
+            <h2 className="section-title">{ui.previewTitle}</h2>
             <iframe className="preview__frame" title="PDF Preview" src={pdfUrl} />
           </section>
         ) : null}
