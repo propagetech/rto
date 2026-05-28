@@ -37,30 +37,35 @@ const PdfTemplate = forwardRef(function PdfTemplate({ form }, ref) {
         <FieldRow no="1" label={LABELS.applicantName} value={form.applicantName} />
         <RelationRow selected={form.relationType} name={form.relationName} />
 
-        <FieldRow no="2" label={LABELS.address} value={valueOrBlank(form.addressLine1)} />
-        <FieldRow value={valueOrBlank(form.addressLine2)} indent blank />
-        <FieldRow value={valueOrBlank(form.addressLine3)} indent blank />
+        <AddressRow
+          no="2"
+          label={LABELS.address}
+          line1={form.addressLine1}
+          line2={form.addressLine2}
+          line3={form.addressLine3}
+        />
 
         <FieldRow no="3" label={LABELS.phone} value={phoneForPdf(form.phone)} />
         <FieldRow no="4" label={LABELS.email} value={form.email} />
         <FieldRow no="5" label={LABELS.requestedRegNumber} value={requestedRegNumberDisplay} bigValue />
         <FieldRow no="6" label={LABELS.rtoOfficeName} value={form.rtoOfficeName} />
 
-        <div className="pdf-doc-row">
-          <div className="pdf-doc-row__no">7.</div>
-          <div className="pdf-doc-row__body">
-            <div className="pdf-doc-row__title">{LABELS.documentsTitle}</div>
+        <div className="pdf-field-row pdf-doc-row">
+          <div className="pdf-field-row__no">7.</div>
+          <div className="pdf-field-row__label">{LABELS.documentsTitle}</div>
+          <div className="pdf-field-row__colon">:</div>
+          <div className="pdf-doc-row__checks">
             <div className="pdf-check">
-              <span className="pdf-check__box">{form.docForm21 ? "☒" : "☐"}</span>
-              <span>{LABELS.docForm21}</span>
+              <span className={`pdf-check__box ${form.docForm21 ? "pdf-check__box--checked" : ""}`} />
+              <span className="pdf-check__label">{LABELS.docForm21}</span>
             </div>
             <div className="pdf-check">
-              <span className="pdf-check__box">{form.docForm23 ? "☒" : "☐"}</span>
-              <span>{LABELS.docForm23}</span>
+              <span className={`pdf-check__box ${form.docForm23 ? "pdf-check__box--checked" : ""}`} />
+              <span className="pdf-check__label">{LABELS.docForm23}</span>
             </div>
             <div className="pdf-check">
-              <span className="pdf-check__box">{form.docRcOther ? "☒" : "☐"}</span>
-              <span>{LABELS.docRcOther}</span>
+              <span className={`pdf-check__box ${form.docRcOther ? "pdf-check__box--checked" : ""}`} />
+              <span className="pdf-check__label">{LABELS.docRcOther}</span>
             </div>
           </div>
         </div>
@@ -91,18 +96,22 @@ const PdfTemplate = forwardRef(function PdfTemplate({ form }, ref) {
       </div>
 
       <div className="pdf-declaration">
-        <div className="pdf-declaration__title">{LABELS.declarationTitle}</div>
+        {/* <div className="pdf-declaration__title">{LABELS.declarationTitle}</div> */}
         <div className="pdf-declaration__body">{LABELS.declarationText}</div>
       </div>
 
       <div className="pdf-footer">
-        <div className="pdf-footer__row">
-          <span className="pdf-footer__label">{LABELS.place} :</span>
-          <span className="pdf-footer__value">{placeForPdf(form.place)}</span>
-        </div>
-        <div className="pdf-footer__row">
-          <span className="pdf-footer__label">{LABELS.date} :</span>
-          <span className="pdf-footer__value">{form.date}</span>
+        <div className="pdf-footer__col">
+          <div className="pdf-footer__row">
+            <span className="pdf-footer__label">{LABELS.place}</span>
+            <span className="pdf-footer__colon">:</span>
+            <span className="pdf-footer__value">{placeForPdf(form.place)}</span>
+          </div>
+          <div className="pdf-footer__row">
+            <span className="pdf-footer__label">{LABELS.date}</span>
+            <span className="pdf-footer__colon">:</span>
+            <span className="pdf-footer__value">{form.date}</span>
+          </div>
         </div>
         <div className="pdf-footer__sig">
           <div className="pdf-footer__sigName" />
@@ -124,7 +133,7 @@ function RelationRow({ selected, name }) {
             <span className={selected && opt === selected ? "pdf-relation__picked" : selected ? "pdf-relation__struck" : ""}>
               {opt}
             </span>
-            {i < opts.length - 1 ? <span className="pdf-relation__sep"> / </span> : null}
+            {i < opts.length - 1 ? <span className="pdf-relation__sep"> - </span> : null}
           </span>
         ))}
       </div>
@@ -136,10 +145,25 @@ function RelationRow({ selected, name }) {
   );
 }
 
+function AddressRow({ no, label, line1, line2, line3 }) {
+  const lines = [line1, line2, line3].map((l) => String(l ?? "").trim());
+  while (lines.length > 1 && !lines[lines.length - 1]) lines.pop();
+  const text = lines.join("\n") || " ";
+
+  return (
+    <div className="pdf-field-row pdf-address-row">
+      <div className="pdf-field-row__no">{no ? `${no}.` : ""}</div>
+      <div className="pdf-field-row__label">{label}</div>
+      <div className="pdf-field-row__colon">:</div>
+      <div className="pdf-address-value">{text}</div>
+    </div>
+  );
+}
+
 function FieldRow({ no, label, value, indent, blank, bigValue }) {
   return (
     <div className={`pdf-field-row ${indent ? "pdf-field-row--indent" : ""}`}>
-      <div className="pdf-field-row__no">{no || ""}</div>
+      <div className="pdf-field-row__no">{no ? `${no}.` : ""}</div>
       <div className="pdf-field-row__label">{blank ? "" : label}</div>
       <div className="pdf-field-row__colon">{blank ? "" : ":"}</div>
       <div className="pdf-field-row__value">
