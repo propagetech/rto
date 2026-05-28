@@ -306,10 +306,47 @@ body {
   opacity: 0.8;
 }
 
+.field input:disabled {
+  background: var(--bg);
+  color: var(--muted);
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
 .field input[type="text"],
 .field input[type="tel"] {
   text-transform: uppercase;
   letter-spacing: 0.3px;
+}
+
+.phone-group {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.phone-group__prefix {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 14px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  background: var(--primary);
+  color: var(--primary-contrast);
+  font-weight: 900;
+  font-size: calc(16px * var(--font-scale));
+  letter-spacing: 1px;
+  user-select: none;
+  box-shadow: 3px 3px 0 var(--pop-shadow);
+  white-space: nowrap;
+}
+
+.field .phone-group input {
+  flex: 1;
+  min-width: 0;
+  letter-spacing: 2px;
+  font-weight: 700;
 }
 
 .reg-segments {

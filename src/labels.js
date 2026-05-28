@@ -136,18 +136,19 @@ export function buildPdfFileName(form) {
       .replace(/_+/g, "_")
       .replace(/^_+|_+$/g, "");
   const vClass = form.vehicleClass === "OTH" ? form.vehicleClassOther : form.vehicleClass;
-  const parts = [sanitize(form.signatureName), sanitize(vClass), sanitize(form.vehicleNumber)].filter(Boolean);
+  const parts = [sanitize(form.signatureName), sanitize(vClass), sanitize(regNumberForPdf(form))].filter(Boolean);
   const base = parts.length ? parts.join("_") : "karnataka-rto-choice-number-form";
   return `${base}.pdf`;
 }
 
 export function buildShareMessage(form) {
   const regNum = regNumberForPdf(form);
+  const phone = phoneForPdf(form.phone);
   const parts = [
     "ಆಯ್ಕೆ ನೋಂದಣಿ ಸಂಖ್ಯೆ ಅರ್ಜಿ",
     form.applicantName ? `ಅರ್ಜಿದಾರ: ${form.applicantName}` : null,
     regNum ? `ಕೋರಿದ ಸಂಖ್ಯೆ: ${regNum}` : null,
-    form.phone ? `ದೂರವಾಣಿ: ${form.phone}` : null
+    phone ? `ದೂರವಾಣಿ: ${phone}` : null
   ].filter(Boolean);
   return parts.join("\n");
 }
@@ -183,6 +184,14 @@ export const AMOUNT_OPTIONS = [
 
 export const REG_NUMBER_PREFIX = "KA";
 
+export const PHONE_PREFIX = "+91";
+
+export function phoneForPdf(value) {
+  const digits = String(value || "").replace(/[^0-9]/g, "");
+  if (!digits) return "";
+  return `${PHONE_PREFIX} ${digits}`;
+}
+
 export function regNumberForPdf(form) {
   const district = String(form?.regDistrict || "").trim();
   const series = String(form?.regSeries || "").trim().toUpperCase();
@@ -197,12 +206,9 @@ export const UPPERCASE_FIELDS = new Set([
   "addressLine1",
   "addressLine2",
   "addressLine3",
-  "phone",
   "regSeries",
   "rtoOfficeName",
-  "vehicleNumber",
   "vehicleClassOther",
-  "ddNumber",
   "bankName",
   "place",
   "signatureName"

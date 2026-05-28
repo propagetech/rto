@@ -1,5 +1,5 @@
 import { forwardRef } from "react";
-import { LABELS, placeForPdf, regNumberForPdf } from "../labels.js";
+import { LABELS, phoneForPdf, placeForPdf, regNumberForPdf } from "../labels.js";
 
 function valueOrBlank(v) {
   const s = String(v ?? "").trim();
@@ -41,7 +41,7 @@ const PdfTemplate = forwardRef(function PdfTemplate({ form }, ref) {
         <FieldRow value={valueOrBlank(form.addressLine2)} indent blank />
         <FieldRow value={valueOrBlank(form.addressLine3)} indent blank />
 
-        <FieldRow no="3" label={LABELS.phone} value={form.phone} />
+        <FieldRow no="3" label={LABELS.phone} value={phoneForPdf(form.phone)} />
         <FieldRow no="4" label={LABELS.email} value={form.email} />
         <FieldRow no="5" label={LABELS.requestedRegNumber} value={requestedRegNumberDisplay} bigValue />
         <FieldRow no="6" label={LABELS.rtoOfficeName} value={form.rtoOfficeName} />
@@ -80,7 +80,7 @@ const PdfTemplate = forwardRef(function PdfTemplate({ form }, ref) {
           </thead>
           <tbody>
             <tr>
-              <td>{valueOrBlank(form.vehicleNumber)}</td>
+              <td>{valueOrBlank(requestedRegNumberDisplay)}</td>
               <td>{valueOrBlank(vehicleClassDisplay)}</td>
               <td>{valueOrBlank(form.amount)}</td>
               <td>{valueOrBlank(form.ddNumber)}</td>

@@ -6,7 +6,9 @@ import {
   getUiLabels,
   INITIAL_FORM,
   isRegNumberValid,
+  PHONE_PREFIX,
   REG_NUMBER_PREFIX,
+  regNumberForPdf,
   RELATION_OPTIONS,
   REQUIRED_FIELDS,
   UPPERCASE_FIELDS,
@@ -174,6 +176,18 @@ export default function App() {
     const digits = e.target.value.replace(/[^0-9]/g, "").slice(0, 4);
     lastBlobRef.current = null;
     setForm((prev) => ({ ...prev, regUnique: digits }));
+  };
+
+  const handleDdNumberChange = (e) => {
+    const digits = e.target.value.replace(/[^0-9]/g, "").slice(0, 6);
+    lastBlobRef.current = null;
+    setForm((prev) => ({ ...prev, ddNumber: digits }));
+  };
+
+  const handlePhoneChange = (e) => {
+    const digits = e.target.value.replace(/[^0-9]/g, "").slice(0, 10);
+    lastBlobRef.current = null;
+    setForm((prev) => ({ ...prev, phone: digits }));
   };
 
   const handleRegSegmentKeyDown = (prevId) => (e) => {
@@ -424,16 +438,24 @@ export default function App() {
                 <label htmlFor="phone">
                   {ui.phone} <span className="req" aria-hidden="true">*</span>
                 </label>
-                <input
-                  id="phone"
-                  type="tel"
-                  inputMode="tel"
-                  autoComplete="tel"
-                  value={form.phone}
-                  onChange={update("phone")}
-                  required
-                  aria-required="true"
-                />
+                <div className="phone-group">
+                  <span className="phone-group__prefix" aria-label="India country code">
+                    {PHONE_PREFIX}
+                  </span>
+                  <input
+                    id="phone"
+                    type="tel"
+                    inputMode="numeric"
+                    pattern="\d{10}"
+                    maxLength={10}
+                    autoComplete="tel-national"
+                    placeholder="9876543210"
+                    value={form.phone}
+                    onChange={handlePhoneChange}
+                    required
+                    aria-required="true"
+                  />
+                </div>
               </div>
 
               <div className="field">
@@ -553,7 +575,15 @@ export default function App() {
             <div className="grid">
               <div className="field">
                 <label htmlFor="vehicleNumber">{ui.vehicleNumber}</label>
-                <input id="vehicleNumber" type="text" value={form.vehicleNumber} onChange={update("vehicleNumber")} />
+                <input
+                  id="vehicleNumber"
+                  type="text"
+                  value={regNumberForPdf(form)}
+                  disabled
+                  readOnly
+                  aria-readonly="true"
+                  tabIndex={-1}
+                />
               </div>
               <div className="field">
                 <label htmlFor="vehicleClass">{ui.vehicleClass}</label>
@@ -590,7 +620,16 @@ export default function App() {
               </div>
               <div className="field">
                 <label htmlFor="ddNumber">{ui.ddNumber}</label>
-                <input id="ddNumber" type="text" value={form.ddNumber} onChange={update("ddNumber")} />
+                <input
+                  id="ddNumber"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="\d{6}"
+                  maxLength={6}
+                  placeholder="123456"
+                  value={form.ddNumber}
+                  onChange={handleDdNumberChange}
+                />
               </div>
               <div className="field">
                 <label htmlFor="bankName">{ui.bankName}</label>
