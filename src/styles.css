@@ -366,10 +366,17 @@ body {
   cursor: default;
   background: transparent;
   border-style: dashed;
+  justify-content: flex-start;
+  text-align: left;
 }
 
 .check--readonly:hover {
   border-color: var(--border-soft);
+}
+
+.check--readonly input[type="checkbox"]:disabled {
+  cursor: not-allowed;
+  opacity: 1;
 }
 
 .check__box {

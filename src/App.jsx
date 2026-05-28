@@ -534,15 +534,15 @@ export default function App() {
             <h2 className="section-title" id="documents-title">{ui.documentsTitle}</h2>
             <ul className="checks checks--readonly" aria-describedby="documents-title">
               <li className="check check--readonly">
-                <span className="check__box" aria-hidden="true">☐</span>
+                <input type="checkbox" disabled tabIndex={-1} aria-hidden="true" />
                 <span>{ui.docForm21}</span>
               </li>
               <li className="check check--readonly">
-                <span className="check__box" aria-hidden="true">☐</span>
+                <input type="checkbox" disabled tabIndex={-1} aria-hidden="true" />
                 <span>{ui.docForm23}</span>
               </li>
               <li className="check check--readonly">
-                <span className="check__box" aria-hidden="true">☐</span>
+                <input type="checkbox" disabled tabIndex={-1} aria-hidden="true" />
                 <span>{ui.docRcOther}</span>
               </li>
             </ul>
