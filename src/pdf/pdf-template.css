@@ -6,7 +6,7 @@
 }
 
 .pdf-doc {
-  --pdf-scale: 1.8;
+  --pdf-scale: 1;
   width: 794px;
   min-height: 1100px;
   padding: 56px 64px;
@@ -94,45 +94,11 @@
   line-height: 1.2;
 }
 
-.pdf-field-row--hero {
-  grid-template-columns: 28px 1fr;
-  grid-template-rows: auto auto;
-  gap: 6px 4px;
-  margin: 12px 0;
-}
-
-.pdf-field-row--hero .pdf-field-row__no {
-  grid-row: 1;
-  grid-column: 1;
-}
-
-.pdf-field-row--hero .pdf-field-row__label {
-  grid-row: 1;
-  grid-column: 2;
-}
-
-.pdf-field-row--hero .pdf-field-row__colon {
-  display: none;
-}
-
-.pdf-field-row--hero .pdf-field-row__value {
-  grid-row: 2;
-  grid-column: 1 / -1;
-  text-align: center;
-  border-bottom: none;
-  border: 3px solid #000;
-  border-radius: 12px;
-  padding: 16px 20px;
-  margin-top: 4px;
-  background: #fafaf6;
-}
-
 .pdf-field-row__valueText--big {
-  display: block;
-  font-size: calc(60px * var(--pdf-scale));
+  font-size: calc(48px * var(--pdf-scale));
   font-weight: 900;
-  letter-spacing: 3px;
-  line-height: 1;
+  letter-spacing: 2px;
+  line-height: 1.1;
   white-space: nowrap;
 }
 

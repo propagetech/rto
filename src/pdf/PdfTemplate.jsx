@@ -137,15 +137,8 @@ function RelationRow({ selected, name }) {
 }
 
 function FieldRow({ no, label, value, indent, blank, bigValue }) {
-  const cls = [
-    "pdf-field-row",
-    indent ? "pdf-field-row--indent" : "",
-    bigValue ? "pdf-field-row--hero" : ""
-  ]
-    .filter(Boolean)
-    .join(" ");
   return (
-    <div className={cls}>
+    <div className={`pdf-field-row ${indent ? "pdf-field-row--indent" : ""}`}>
       <div className="pdf-field-row__no">{no || ""}</div>
       <div className="pdf-field-row__label">{blank ? "" : label}</div>
       <div className="pdf-field-row__colon">{blank ? "" : ":"}</div>
