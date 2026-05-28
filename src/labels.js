@@ -142,10 +142,11 @@ export function buildPdfFileName(form) {
 }
 
 export function buildShareMessage(form) {
+  const regNum = regNumberForPdf(form);
   const parts = [
     "ಆಯ್ಕೆ ನೋಂದಣಿ ಸಂಖ್ಯೆ ಅರ್ಜಿ",
     form.applicantName ? `ಅರ್ಜಿದಾರ: ${form.applicantName}` : null,
-    form.requestedRegNumber ? `ಕೋರಿದ ಸಂಖ್ಯೆ: ${form.requestedRegNumber}` : null,
+    regNum ? `ಕೋರಿದ ಸಂಖ್ಯೆ: ${regNum}` : null,
     form.phone ? `ದೂರವಾಣಿ: ${form.phone}` : null
   ].filter(Boolean);
   return parts.join("\n");
@@ -181,21 +182,13 @@ export const AMOUNT_OPTIONS = [
 ];
 
 export const REG_NUMBER_PREFIX = "KA";
-export const REG_NUMBER_PLACEHOLDER = "KA-51-AA-1111";
 
-export function formatRegNumber(input) {
-  let raw = String(input || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
-  if (raw.startsWith("KA")) raw = raw.slice(2);
-
-  let result = REG_NUMBER_PREFIX;
-  if (raw.length > 0) result += "-" + raw.slice(0, 2);
-  if (raw.length > 2) result += "-" + raw.slice(2, 4);
-  if (raw.length > 4) result += "-" + raw.slice(4, 8);
-  return result;
-}
-
-export function regNumberForPdf(value) {
-  return String(value || "").trim().toUpperCase();
+export function regNumberForPdf(form) {
+  const district = String(form?.regDistrict || "").trim();
+  const series = String(form?.regSeries || "").trim().toUpperCase();
+  const unique = String(form?.regUnique || "").trim();
+  const parts = [district, series, unique].filter(Boolean);
+  return parts.length ? `${REG_NUMBER_PREFIX}-${parts.join("-")}` : "";
 }
 
 export const UPPERCASE_FIELDS = new Set([
@@ -205,7 +198,7 @@ export const UPPERCASE_FIELDS = new Set([
   "addressLine2",
   "addressLine3",
   "phone",
-  "requestedRegNumber",
+  "regSeries",
   "rtoOfficeName",
   "vehicleNumber",
   "vehicleClassOther",
@@ -225,6 +218,9 @@ export const INITIAL_FORM = {
   phone: "",
   email: "",
   requestedRegNumber: "",
+  regDistrict: "",
+  regSeries: "",
+  regUnique: "",
   rtoOfficeName: "",
   docForm21: false,
   docForm23: false,
@@ -254,9 +250,21 @@ export const REQUIRED_FIELDS = [
   "applicantName",
   "addressLine1",
   "phone",
-  "requestedRegNumber",
+  "regDistrict",
+  "regSeries",
+  "regUnique",
   "rtoOfficeName",
   "place",
   "date",
   "signatureName"
 ];
+
+export function isRegNumberValid(form) {
+  const district = String(form?.regDistrict || "");
+  const series = String(form?.regSeries || "");
+  const unique = String(form?.regUnique || "");
+  if (!/^\d{2}$/.test(district)) return false;
+  if (!/^[A-Z]{1,2}$/.test(series.toUpperCase())) return false;
+  if (!/^\d{4}$/.test(unique)) return false;
+  return true;
+}

@@ -3,10 +3,10 @@ import {
   AMOUNT_OPTIONS,
   buildPdfFileName,
   buildShareMessage,
-  formatRegNumber,
   getUiLabels,
   INITIAL_FORM,
-  REG_NUMBER_PLACEHOLDER,
+  isRegNumberValid,
+  REG_NUMBER_PREFIX,
   RELATION_OPTIONS,
   REQUIRED_FIELDS,
   UPPERCASE_FIELDS,
@@ -26,7 +26,8 @@ function todayISODate() {
 }
 
 function isComplete(form) {
-  return REQUIRED_FIELDS.every((key) => String(form[key] || "").trim().length > 0);
+  if (!REQUIRED_FIELDS.every((key) => String(form[key] || "").trim().length > 0)) return false;
+  return isRegNumberValid(form);
 }
 
 export default function App() {
@@ -139,21 +140,24 @@ export default function App() {
     setForm((prev) => ({ ...prev, signatureName: e.target.value.toUpperCase() }));
   };
 
-  const handleRegNumberChange = (e) => {
-    const formatted = formatRegNumber(e.target.value);
+  const handleRegSegmentChange = (segment, maxLen, kind, nextId) => (e) => {
+    const allowed = kind === "digit" ? /[^0-9]/g : /[^A-Z]/g;
+    let val = e.target.value.toUpperCase().replace(allowed, "").slice(0, maxLen);
     lastBlobRef.current = null;
-    setForm((prev) => ({ ...prev, requestedRegNumber: formatted }));
-  };
-
-  const handleRegNumberFocus = () => {
-    if (!form.requestedRegNumber) {
-      setForm((prev) => ({ ...prev, requestedRegNumber: "KA-" }));
+    setForm((prev) => ({ ...prev, [segment]: val }));
+    if (val.length === maxLen && nextId) {
+      const next = document.getElementById(nextId);
+      if (next) next.focus();
     }
   };
 
-  const handleRegNumberBlur = () => {
-    if (form.requestedRegNumber === "KA-" || form.requestedRegNumber === "KA") {
-      setForm((prev) => ({ ...prev, requestedRegNumber: "" }));
+  const handleRegSegmentKeyDown = (prevId) => (e) => {
+    if (e.key === "Backspace" && e.currentTarget.value === "" && prevId) {
+      const prev = document.getElementById(prevId);
+      if (prev) {
+        e.preventDefault();
+        prev.focus();
+      }
     }
   };
 
@@ -424,24 +428,64 @@ export default function App() {
           <section className="card" aria-labelledby="request-section-title">
             <h2 className="section-title" id="request-section-title">{ui.requestSectionTitle}</h2>
             <div className="grid">
-              <div className="field">
-                <label htmlFor="requestedRegNumber">
+              <div className="field" role="group" aria-labelledby="reg-number-label">
+                <span className="field__legend" id="reg-number-label">
                   {ui.requestedRegNumber} <span className="req" aria-hidden="true">*</span>
-                </label>
-                <input
-                  id="requestedRegNumber"
-                  type="text"
-                  placeholder={REG_NUMBER_PLACEHOLDER}
-                  value={form.requestedRegNumber}
-                  onChange={handleRegNumberChange}
-                  onFocus={handleRegNumberFocus}
-                  onBlur={handleRegNumberBlur}
-                  required
-                  aria-required="true"
-                  aria-describedby="requestedRegNumber-hint"
-                />
-                <span id="requestedRegNumber-hint" className="sr-only">
-                  Format: KA followed by two digits, two letters, four digits. Example: KA 51 AA 1111.
+                </span>
+                <div className="reg-segments" aria-describedby="reg-number-hint">
+                  <span className="reg-segments__prefix" aria-label="State code">
+                    {REG_NUMBER_PREFIX}
+                  </span>
+                  <span className="reg-segments__dash" aria-hidden="true">-</span>
+                  <input
+                    id="regDistrict"
+                    className="reg-segments__input reg-segments__input--two"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="\d{2}"
+                    maxLength={2}
+                    placeholder="51"
+                    aria-label="District code, two digits"
+                    value={form.regDistrict}
+                    onChange={handleRegSegmentChange("regDistrict", 2, "digit", "regSeries")}
+                    onKeyDown={handleRegSegmentKeyDown(null)}
+                    required
+                    aria-required="true"
+                  />
+                  <span className="reg-segments__dash" aria-hidden="true">-</span>
+                  <input
+                    id="regSeries"
+                    className="reg-segments__input reg-segments__input--two"
+                    type="text"
+                    pattern="[A-Z]{1,2}"
+                    maxLength={2}
+                    placeholder="AA"
+                    aria-label="Series code, one or two letters"
+                    value={form.regSeries}
+                    onChange={handleRegSegmentChange("regSeries", 2, "alpha", "regUnique")}
+                    onKeyDown={handleRegSegmentKeyDown("regDistrict")}
+                    required
+                    aria-required="true"
+                  />
+                  <span className="reg-segments__dash" aria-hidden="true">-</span>
+                  <input
+                    id="regUnique"
+                    className="reg-segments__input reg-segments__input--four"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="\d{4}"
+                    maxLength={4}
+                    placeholder="1234"
+                    aria-label="Unique number, four digits"
+                    value={form.regUnique}
+                    onChange={handleRegSegmentChange("regUnique", 4, "digit", null)}
+                    onKeyDown={handleRegSegmentKeyDown("regSeries")}
+                    required
+                    aria-required="true"
+                  />
+                </div>
+                <span id="reg-number-hint" className="sr-only">
+                  Format: KA, then a two-digit district code, then one or two letters, then a four-digit unique number.
                 </span>
               </div>
 
@@ -463,20 +507,20 @@ export default function App() {
 
           <section className="card" aria-labelledby="documents-title">
             <h2 className="section-title" id="documents-title">{ui.documentsTitle}</h2>
-            <div className="checks" role="group" aria-labelledby="documents-title">
-              <label className="check">
-                <input type="checkbox" checked={form.docForm21} onChange={update("docForm21")} />
+            <ul className="checks checks--readonly" aria-describedby="documents-title">
+              <li className="check check--readonly">
+                <span className="check__box" aria-hidden="true">☐</span>
                 <span>{ui.docForm21}</span>
-              </label>
-              <label className="check">
-                <input type="checkbox" checked={form.docForm23} onChange={update("docForm23")} />
+              </li>
+              <li className="check check--readonly">
+                <span className="check__box" aria-hidden="true">☐</span>
                 <span>{ui.docForm23}</span>
-              </label>
-              <label className="check">
-                <input type="checkbox" checked={form.docRcOther} onChange={update("docRcOther")} />
+              </li>
+              <li className="check check--readonly">
+                <span className="check__box" aria-hidden="true">☐</span>
                 <span>{ui.docRcOther}</span>
-              </label>
-            </div>
+              </li>
+            </ul>
           </section>
 
           <section className="card" aria-labelledby="payment-title">

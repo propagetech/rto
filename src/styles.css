@@ -312,10 +312,79 @@ body {
   letter-spacing: 0.3px;
 }
 
-#requestedRegNumber {
+.reg-segments {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.reg-segments__prefix {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  min-width: 64px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  background: var(--primary);
+  color: var(--primary-contrast);
+  font-weight: 900;
+  font-size: calc(18px * var(--font-scale));
+  letter-spacing: 3px;
+  user-select: none;
+  box-shadow: 3px 3px 0 var(--pop-shadow);
+}
+
+.reg-segments__dash {
+  display: inline-flex;
+  align-items: center;
   font-weight: 800;
-  letter-spacing: 2px;
-  font-size: calc(16px * var(--font-scale));
+  font-size: calc(20px * var(--font-scale));
+  color: var(--muted);
+  user-select: none;
+}
+
+.field .reg-segments__input {
+  text-align: center;
+  font-weight: 800;
+  font-size: calc(18px * var(--font-scale));
+  letter-spacing: 3px;
+  padding: 12px 8px;
+  width: auto;
+}
+
+.field .reg-segments__input--two {
+  width: 4.5em;
+}
+
+.field .reg-segments__input--four {
+  width: 7.5em;
+}
+
+.check--readonly {
+  cursor: default;
+  background: transparent;
+  border-style: dashed;
+}
+
+.check--readonly:hover {
+  border-color: var(--border-soft);
+}
+
+.check__box {
+  display: inline-block;
+  font-size: calc(20px * var(--font-scale));
+  line-height: 1;
+  width: 20px;
+  text-align: center;
+  flex: 0 0 auto;
+}
+
+.checks--readonly {
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 .field--full {

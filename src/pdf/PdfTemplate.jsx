@@ -12,7 +12,7 @@ const PdfTemplate = forwardRef(function PdfTemplate({ form }, ref) {
       ? form.vehicleClassOther
       : form.vehicleClass;
 
-  const requestedRegNumberDisplay = regNumberForPdf(form.requestedRegNumber);
+  const requestedRegNumberDisplay = regNumberForPdf(form);
 
   return (
     <div ref={ref} className="pdf-doc">
