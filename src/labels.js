@@ -181,15 +181,21 @@ export const AMOUNT_OPTIONS = [
 ];
 
 export const REG_NUMBER_PREFIX = "KA";
-export const REG_NUMBER_PLACEHOLDER = "51-AA-1234";
+export const REG_NUMBER_PLACEHOLDER = "KA-51-AA-1111";
 
-export function regNumberForPdf(rest) {
-  const cleaned = String(rest || "")
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-+|-+$/g, "");
-  return cleaned ? `${REG_NUMBER_PREFIX}-${cleaned}` : "";
+export function formatRegNumber(input) {
+  let raw = String(input || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (raw.startsWith("KA")) raw = raw.slice(2);
+
+  let result = REG_NUMBER_PREFIX;
+  if (raw.length > 0) result += "-" + raw.slice(0, 2);
+  if (raw.length > 2) result += "-" + raw.slice(2, 4);
+  if (raw.length > 4) result += "-" + raw.slice(4, 8);
+  return result;
+}
+
+export function regNumberForPdf(value) {
+  return String(value || "").trim().toUpperCase();
 }
 
 export const UPPERCASE_FIELDS = new Set([

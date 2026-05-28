@@ -3,10 +3,10 @@ import {
   AMOUNT_OPTIONS,
   buildPdfFileName,
   buildShareMessage,
+  formatRegNumber,
   getUiLabels,
   INITIAL_FORM,
   REG_NUMBER_PLACEHOLDER,
-  REG_NUMBER_PREFIX,
   RELATION_OPTIONS,
   REQUIRED_FIELDS,
   UPPERCASE_FIELDS,
@@ -115,6 +115,24 @@ export default function App() {
     sigTouchedRef.current = true;
     lastBlobRef.current = null;
     setForm((prev) => ({ ...prev, signatureName: e.target.value.toUpperCase() }));
+  };
+
+  const handleRegNumberChange = (e) => {
+    const formatted = formatRegNumber(e.target.value);
+    lastBlobRef.current = null;
+    setForm((prev) => ({ ...prev, requestedRegNumber: formatted }));
+  };
+
+  const handleRegNumberFocus = () => {
+    if (!form.requestedRegNumber) {
+      setForm((prev) => ({ ...prev, requestedRegNumber: "KA-" }));
+    }
+  };
+
+  const handleRegNumberBlur = () => {
+    if (form.requestedRegNumber === "KA-" || form.requestedRegNumber === "KA") {
+      setForm((prev) => ({ ...prev, requestedRegNumber: "" }));
+    }
   };
 
   const canGenerate = useMemo(() => isComplete(form), [form]);
@@ -346,17 +364,16 @@ export default function App() {
                 <label htmlFor="requestedRegNumber">
                   {ui.requestedRegNumber} <span className="req">*</span>
                 </label>
-                <div className="reg-number-group">
-                  <span className="reg-number-group__prefix">{REG_NUMBER_PREFIX}</span>
-                  <input
-                    id="requestedRegNumber"
-                    type="text"
-                    placeholder={REG_NUMBER_PLACEHOLDER}
-                    value={form.requestedRegNumber}
-                    onChange={update("requestedRegNumber")}
-                    required
-                  />
-                </div>
+                <input
+                  id="requestedRegNumber"
+                  type="text"
+                  placeholder={REG_NUMBER_PLACEHOLDER}
+                  value={form.requestedRegNumber}
+                  onChange={handleRegNumberChange}
+                  onFocus={handleRegNumberFocus}
+                  onBlur={handleRegNumberBlur}
+                  required
+                />
               </div>
 
               <div className="field">
