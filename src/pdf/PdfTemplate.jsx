@@ -46,7 +46,7 @@ const PdfTemplate = forwardRef(function PdfTemplate({ form }, ref) {
 
         <FieldRow no="3" label={LABELS.phone} value={form.phone} />
         <FieldRow no="4" label={LABELS.email} value={form.email} />
-        <FieldRow no="5" label={LABELS.requestedRegNumber} value={form.requestedRegNumber} />
+        <FieldRow no="5" label={LABELS.requestedRegNumber} value={form.requestedRegNumber} bigValue />
         <FieldRow no="6" label={LABELS.rtoOfficeName} value={form.rtoOfficeName} />
 
         <div className="pdf-doc-row">
@@ -116,14 +116,16 @@ const PdfTemplate = forwardRef(function PdfTemplate({ form }, ref) {
   );
 });
 
-function FieldRow({ no, label, value, indent, blank }) {
+function FieldRow({ no, label, value, indent, blank, bigValue }) {
   return (
     <div className={`pdf-field-row ${indent ? "pdf-field-row--indent" : ""}`}>
       <div className="pdf-field-row__no">{no || ""}</div>
       <div className="pdf-field-row__label">{blank ? "" : label}</div>
       <div className="pdf-field-row__colon">{blank ? "" : ":"}</div>
       <div className="pdf-field-row__value">
-        <span className="pdf-field-row__valueText">{valueOrBlank(value)}</span>
+        <span className={`pdf-field-row__valueText ${bigValue ? "pdf-field-row__valueText--big" : ""}`}>
+          {valueOrBlank(value)}
+        </span>
       </div>
     </div>
   );
