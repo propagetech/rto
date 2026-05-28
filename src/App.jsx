@@ -187,7 +187,6 @@ export default function App() {
                   required
                 />
               </div>
-
               <div className="field field--split">
                 <div>
                   <label htmlFor="relationType">{LABELS.relationType}</label>
