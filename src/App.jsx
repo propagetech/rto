@@ -202,9 +202,9 @@ export default function App() {
 
   const canGenerate = useMemo(() => isComplete(form), [form]);
 
-  const ensureBlob = async () => {
+  const ensureBlob = async ({ allowIncomplete = false } = {}) => {
     if (lastBlobRef.current) return lastBlobRef.current;
-    if (!isComplete(form)) {
+    if (!allowIncomplete && !isComplete(form)) {
       setStatus(ui.statusMissing);
       return null;
     }
@@ -246,7 +246,7 @@ export default function App() {
   };
 
   const handleDownload = async () => {
-    const blob = await ensureBlob();
+    const blob = await ensureBlob({ allowIncomplete: true });
     if (!blob) return;
     downloadBlob(blob);
   };
@@ -687,7 +687,7 @@ export default function App() {
                 type="button"
                 className="btn"
                 onClick={handleDownload}
-                disabled={busy || (!lastBlobRef.current && !canGenerate)}
+                disabled={busy}
               >
                 {ui.downloadPdf}
               </button>

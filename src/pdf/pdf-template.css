@@ -44,7 +44,7 @@
 }
 
 .pdf-sep {
-  border-top: 1px solid #999;
+  border-top: 1px solid #000;
   margin: 10px 0 14px;
 }
 
@@ -103,7 +103,7 @@
 }
 
 .pdf-field-row__value {
-  border-bottom: 1px solid #b6b6b6;
+  border-bottom: 1px solid #000;
   min-height: 22px;
   padding: 0 2px 1px;
 }
@@ -137,18 +137,20 @@
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
   font-size: calc(20px * var(--pdf-scale));
   font-weight: 600;
-  line-height: 24px;
+  line-height: 33px;
   white-space: pre-wrap;
   word-break: break-word;
-  min-height: 72px;
+  min-height: 99px;
   padding: 0 2px 0;
-  background-image: repeating-linear-gradient(
-    to bottom,
-    transparent 0,
-    transparent 23px,
-    #b6b6b6 23px,
-    #b6b6b6 24px
-  );
+  background-image:
+    linear-gradient(#000, #000),
+    linear-gradient(#000, #000),
+    linear-gradient(#000, #000),
+    linear-gradient(#000, #000),
+    linear-gradient(#000, #000);
+  background-size: 100% 1px;
+  background-position: 0 33px, 0 66px, 0 99px, 0 132px, 0 165px;
+  background-repeat: no-repeat;
 }
 
 .pdf-relation__picked {
@@ -241,27 +243,27 @@
 
 .pdf-table th:nth-child(1),
 .pdf-table td:nth-child(1) {
-  width: 32%;
+  width: 22%;
 }
 
 .pdf-table th:nth-child(2),
 .pdf-table td:nth-child(2) {
-  width: 14%;
+  width: 16.5%;
 }
 
 .pdf-table th:nth-child(3),
 .pdf-table td:nth-child(3) {
-  width: 12%;
+  width: 14.5%;
 }
 
 .pdf-table th:nth-child(4),
 .pdf-table td:nth-child(4) {
-  width: 14%;
+  width: 16.5%;
 }
 
 .pdf-table th:nth-child(5),
 .pdf-table td:nth-child(5) {
-  width: 28%;
+  width: 30.5%;
 }
 
 .pdf-table td:nth-child(1) {
@@ -270,12 +272,16 @@
 
 .pdf-table th,
 .pdf-table td {
-  border: 1px solid #6b6b6b;
+  border: 1px solid #000;
   padding: 6px 6px;
   text-align: left;
   font-size: calc(15px * var(--pdf-scale));
   vertical-align: middle;
   word-break: break-word;
+}
+
+.pdf-table {
+  border: 1px solid #000;
 }
 
 .pdf-table th {
@@ -287,6 +293,10 @@
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
   font-size: calc(18px * var(--pdf-scale));
   font-weight: 600;
+}
+
+.pdf-table--blank td {
+  height: 72px;
 }
 
 .pdf-declaration {
@@ -306,7 +316,7 @@
 }
 
 .pdf-footer {
-  margin-top: 24px;
+  margin-top: 56px;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -355,10 +365,10 @@
 .pdf-footer__sigName {
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
   font-weight: 600;
-  height: 24px;
-  border-bottom: 1px solid #b6b6b6;
+  height: 48px;
+  border-bottom: 1px solid #000;
   padding: 0 4px 1px;
-  min-width: 200px;
+  min-width: 220px;
   box-sizing: border-box;
 }
 

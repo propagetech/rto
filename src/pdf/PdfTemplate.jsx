@@ -13,6 +13,9 @@ const PdfTemplate = forwardRef(function PdfTemplate({ form }, ref) {
       : form.vehicleClass;
 
   const requestedRegNumberDisplay = regNumberForPdf(form);
+  const isBlankForm = !String(form.applicantName ?? "").trim();
+  const placeDisplay = isBlankForm ? "" : placeForPdf(form.place);
+  const dateDisplay = isBlankForm ? "" : form.date;
 
   return (
     <div ref={ref} className="pdf-doc">
@@ -73,7 +76,7 @@ const PdfTemplate = forwardRef(function PdfTemplate({ form }, ref) {
 
       <div className="pdf-payment">
         <div className="pdf-payment__title">{LABELS.paymentTitle}</div>
-        <table className="pdf-table">
+        <table className={`pdf-table ${isBlankForm ? "pdf-table--blank" : ""}`}>
           <thead>
             <tr>
               <th>{LABELS.vehicleNumber}</th>
@@ -105,12 +108,12 @@ const PdfTemplate = forwardRef(function PdfTemplate({ form }, ref) {
           <div className="pdf-footer__row">
             <span className="pdf-footer__label">{LABELS.place}</span>
             <span className="pdf-footer__colon">:</span>
-            <span className="pdf-footer__value">{placeForPdf(form.place)}</span>
+            <span className="pdf-footer__value">{placeDisplay}</span>
           </div>
           <div className="pdf-footer__row">
             <span className="pdf-footer__label">{LABELS.date}</span>
             <span className="pdf-footer__colon">:</span>
-            <span className="pdf-footer__value">{form.date}</span>
+            <span className="pdf-footer__value">{dateDisplay}</span>
           </div>
         </div>
         <div className="pdf-footer__sig">
