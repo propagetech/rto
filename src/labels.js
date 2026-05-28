@@ -180,8 +180,17 @@ export const AMOUNT_OPTIONS = [
   { value: "75000", label: "75,000" }
 ];
 
-export const REG_NUMBER_PREFIX = "KA ";
-export const REG_NUMBER_PLACEHOLDER = "KA 01 AB 1234";
+export const REG_NUMBER_PREFIX = "KA";
+export const REG_NUMBER_PLACEHOLDER = "51-AA-1234";
+
+export function regNumberForPdf(rest) {
+  const cleaned = String(rest || "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return cleaned ? `${REG_NUMBER_PREFIX}-${cleaned}` : "";
+}
 
 export const UPPERCASE_FIELDS = new Set([
   "applicantName",
@@ -209,7 +218,7 @@ export const INITIAL_FORM = {
   addressLine3: "",
   phone: "",
   email: "",
-  requestedRegNumber: "KA ",
+  requestedRegNumber: "",
   rtoOfficeName: "",
   docForm21: false,
   docForm23: false,

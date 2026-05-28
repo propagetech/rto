@@ -1,5 +1,5 @@
 import { forwardRef } from "react";
-import { LABELS, placeForPdf } from "../labels.js";
+import { LABELS, placeForPdf, regNumberForPdf } from "../labels.js";
 
 function valueOrBlank(v) {
   const s = String(v ?? "").trim();
@@ -7,15 +7,12 @@ function valueOrBlank(v) {
 }
 
 const PdfTemplate = forwardRef(function PdfTemplate({ form }, ref) {
-  const rel =
-    form.relationType && form.relationName
-      ? `${form.relationType} ${form.relationName}`
-      : form.relationName || "";
-
   const vehicleClassDisplay =
     form.vehicleClass === "OTH" && form.vehicleClassOther
       ? form.vehicleClassOther
       : form.vehicleClass;
+
+  const requestedRegNumberDisplay = regNumberForPdf(form.requestedRegNumber);
 
   return (
     <div ref={ref} className="pdf-doc">
@@ -38,7 +35,7 @@ const PdfTemplate = forwardRef(function PdfTemplate({ form }, ref) {
 
       <div className="pdf-fields">
         <FieldRow no="1" label={LABELS.applicantName} value={form.applicantName} />
-        <FieldRow label={LABELS.relationType} value={rel} indent />
+        <RelationRow selected={form.relationType} name={form.relationName} />
 
         <FieldRow no="2" label={LABELS.address} value={valueOrBlank(form.addressLine1)} />
         <FieldRow value={valueOrBlank(form.addressLine2)} indent blank />
@@ -46,7 +43,7 @@ const PdfTemplate = forwardRef(function PdfTemplate({ form }, ref) {
 
         <FieldRow no="3" label={LABELS.phone} value={form.phone} />
         <FieldRow no="4" label={LABELS.email} value={form.email} />
-        <FieldRow no="5" label={LABELS.requestedRegNumber} value={form.requestedRegNumber} bigValue />
+        <FieldRow no="5" label={LABELS.requestedRegNumber} value={requestedRegNumberDisplay} bigValue />
         <FieldRow no="6" label={LABELS.rtoOfficeName} value={form.rtoOfficeName} />
 
         <div className="pdf-doc-row">
@@ -115,6 +112,29 @@ const PdfTemplate = forwardRef(function PdfTemplate({ form }, ref) {
     </div>
   );
 });
+
+function RelationRow({ selected, name }) {
+  const opts = ["S/o", "W/o", "D/o"];
+  return (
+    <div className="pdf-field-row pdf-field-row--indent">
+      <div className="pdf-field-row__no" />
+      <div className="pdf-field-row__label pdf-relation">
+        {opts.map((opt, i) => (
+          <span key={opt}>
+            <span className={selected && opt === selected ? "pdf-relation__picked" : selected ? "pdf-relation__struck" : ""}>
+              {opt}
+            </span>
+            {i < opts.length - 1 ? <span className="pdf-relation__sep"> / </span> : null}
+          </span>
+        ))}
+      </div>
+      <div className="pdf-field-row__colon">:</div>
+      <div className="pdf-field-row__value">
+        <span className="pdf-field-row__valueText">{valueOrBlank(name)}</span>
+      </div>
+    </div>
+  );
+}
 
 function FieldRow({ no, label, value, indent, blank, bigValue }) {
   return (

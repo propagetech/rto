@@ -88,12 +88,31 @@
 
 .pdf-field-row__valueText {
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.2;
 }
 
 .pdf-field-row__valueText--big {
-  font-size: 18px;
+  font-size: 36px;
   font-weight: 800;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
+  line-height: 1.1;
+}
+
+.pdf-relation__picked {
+  font-weight: 800;
+  font-size: 16px;
+}
+
+.pdf-relation__struck {
+  text-decoration: line-through;
+  color: #888;
+}
+
+.pdf-relation__sep {
+  color: #555;
+  margin: 0 2px;
 }
 
 .pdf-doc-row {
@@ -160,6 +179,8 @@
 
 .pdf-table td {
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
+  font-size: 18px;
+  font-weight: 600;
 }
 
 .pdf-declaration {
@@ -193,6 +214,8 @@
 .pdf-footer__value {
   margin-left: 4px;
   font-family: "Noto Sans Kannada", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
+  font-size: 20px;
+  font-weight: 600;
 }
 
 .pdf-footer__sig {

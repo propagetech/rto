@@ -6,6 +6,7 @@ import {
   getUiLabels,
   INITIAL_FORM,
   REG_NUMBER_PLACEHOLDER,
+  REG_NUMBER_PREFIX,
   RELATION_OPTIONS,
   REQUIRED_FIELDS,
   UPPERCASE_FIELDS,
@@ -345,14 +346,17 @@ export default function App() {
                 <label htmlFor="requestedRegNumber">
                   {ui.requestedRegNumber} <span className="req">*</span>
                 </label>
-                <input
-                  id="requestedRegNumber"
-                  type="text"
-                  placeholder={REG_NUMBER_PLACEHOLDER}
-                  value={form.requestedRegNumber}
-                  onChange={update("requestedRegNumber")}
-                  required
-                />
+                <div className="reg-number-group">
+                  <span className="reg-number-group__prefix">{REG_NUMBER_PREFIX}</span>
+                  <input
+                    id="requestedRegNumber"
+                    type="text"
+                    placeholder={REG_NUMBER_PLACEHOLDER}
+                    value={form.requestedRegNumber}
+                    onChange={update("requestedRegNumber")}
+                    required
+                  />
+                </div>
               </div>
 
               <div className="field">
