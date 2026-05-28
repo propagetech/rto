@@ -31,25 +31,22 @@ export async function generatePdfFromElement(element) {
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
 
-  const imgWidth = pageWidth;
-  const imgHeight = (canvas.height * imgWidth) / canvas.width;
-  const overflowMm = 3;
+  const aspectRatio = canvas.width / canvas.height;
+  const pageAspectRatio = pageWidth / pageHeight;
 
-  if (imgHeight <= pageHeight + overflowMm) {
-    const fitted = Math.min(imgHeight, pageHeight);
-    pdf.addImage(imgData, "JPEG", 0, 0, imgWidth, fitted);
+  let imgWidth;
+  let imgHeight;
+  if (aspectRatio >= pageAspectRatio) {
+    imgWidth = pageWidth;
+    imgHeight = pageWidth / aspectRatio;
   } else {
-    let heightLeft = imgHeight;
-    let position = 0;
-    pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-    }
+    imgHeight = pageHeight;
+    imgWidth = pageHeight * aspectRatio;
   }
+
+  const x = (pageWidth - imgWidth) / 2;
+  const y = (pageHeight - imgHeight) / 2;
+  pdf.addImage(imgData, "JPEG", x, y, imgWidth, imgHeight);
 
   return pdf.output("blob");
 }
