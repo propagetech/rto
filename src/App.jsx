@@ -339,7 +339,7 @@ export default function App() {
       </header>
 
       <main className="content">
-        <section className="card" aria-labelledby="addressed-label">
+        <section className="card hide" aria-labelledby="addressed-label">
           <address className="addressed">
             <div className="addressed__label" id="addressed-label">{ui.addressedToLabel}</div>
             <div className="addressed__value">
@@ -350,7 +350,7 @@ export default function App() {
           </address>
         </section>
 
-        <section className="card intro" aria-label={ui.introSalutation}>
+        <section className="card intro hide" aria-label={ui.introSalutation}>
           <p className="intro__salutation">{ui.introSalutation}</p>
           <p className="intro__body">{ui.introBody}</p>
         </section>
@@ -415,7 +415,7 @@ export default function App() {
                     required
                     aria-required="true"
                   />
-                  <input
+                  {/* <input
                     type="text"
                     placeholder={ui.addressLine2Placeholder}
                     aria-label={ui.addressLine2Placeholder}
@@ -430,7 +430,7 @@ export default function App() {
                     autoComplete="address-line3"
                     value={form.addressLine3}
                     onChange={update("addressLine3")}
-                  />
+                  /> */}
                 </div>
               </div>
 
@@ -552,7 +552,7 @@ export default function App() {
             </div>
           </section>
 
-          <section className="card" aria-labelledby="documents-title">
+          <section className="card hide" aria-labelledby="documents-title">
             <h2 className="section-title" id="documents-title">{ui.documentsTitle}</h2>
             <ul className="checks checks--readonly" aria-describedby="documents-title">
               <li className="check check--readonly">
@@ -640,7 +640,7 @@ export default function App() {
 
           <section className="card" aria-labelledby="declaration-title">
             <h2 className="section-title" id="declaration-title">{ui.declarationTitle}</h2>
-            <p className="declaration">{ui.declarationText}</p>
+            <p className="declaration hide">{ui.declarationText}</p>
 
             <div className="grid">
               <div className="field">

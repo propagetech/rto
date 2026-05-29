@@ -55,6 +55,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.hide {
+  display: none;
+}
+
 .page {
   max-width: 1080px;
   margin: 0 auto;
@@ -158,6 +162,7 @@ body {
 }
 
 .scan-title {
+  display: none;
   margin: 0;
   text-align: center;
   line-height: 1.35;
