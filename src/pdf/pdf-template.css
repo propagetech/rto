@@ -28,7 +28,7 @@
   font-size: calc(16px * var(--pdf-scale));
   font-weight: 700;
   border-bottom: 1px solid #000;
-  padding-bottom: 3px;
+  padding-bottom: 1px;
   margin: 2px 0;
 }
 
