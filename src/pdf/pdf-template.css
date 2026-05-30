@@ -401,11 +401,3 @@
   line-height: 1.2;
 }
 
-.pdf-timestamp {
-  margin-top: 28px;
-  text-align: right;
-  font-size: calc(11px * var(--pdf-scale));
-  font-weight: 500;
-  letter-spacing: 0.5px;
-  color: #888;
-}

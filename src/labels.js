@@ -97,7 +97,7 @@ export const LABELS_KN = {
   vehicleClassOther: "ವಾಹನ ವರ್ಗ ನಮೂದಿಸಿ",
   vehicleClassOtherPlaceholder: "ವಾಹನ ವರ್ಗ ನಮೂದಿಸಿ",
   amount: "ಮೊತ್ತ",
-  ddNumber: "ಡಿ.ಡಿ NO",
+  ddNumber: "ಡಿ.ಡಿ. ಸಂಖ್ಯೆ",
   bankName: "ಬ್ಯಾಂಕ್ ಹೆಸರು",
   declarationTitle: "ಘೋಷಣೆ",
   declarationText:
@@ -128,6 +128,22 @@ export function getUiLabels(lang) {
 
 export const WHATSAPP_TARGET = "917022593792";
 
+const PDF_STAMP_MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+
+// Save-time stamp, e.g. 01-JAN-2026-02-30-AM. Filename-safe (letters, digits,
+// hyphens only). Computed when the file is named, so it reflects the moment of
+// download/share.
+export function generatedStampForPdf(d = new Date()) {
+  const day = String(d.getDate()).padStart(2, "0");
+  const mon = PDF_STAMP_MONTHS[d.getMonth()];
+  const year = d.getFullYear();
+  const hours24 = d.getHours();
+  const ampm = hours24 >= 12 ? "PM" : "AM";
+  const hours12 = String(hours24 % 12 || 12).padStart(2, "0");
+  const mins = String(d.getMinutes()).padStart(2, "0");
+  return `${day}-${mon}-${year}-${hours12}-${mins}-${ampm}`;
+}
+
 export function buildPdfFileName(form) {
   const sanitize = (s) =>
     String(s || "")
@@ -138,7 +154,7 @@ export function buildPdfFileName(form) {
   const vClass = form.vehicleClass === "OTH" ? form.vehicleClassOther : form.vehicleClass;
   const parts = [sanitize(form.signatureName), sanitize(vClass), sanitize(regNumberForPdf(form))].filter(Boolean);
   const base = parts.length ? parts.join("_") : "karnataka-rto-choice-number-form";
-  return `${base}.pdf`;
+  return `${base}_${generatedStampForPdf()}.pdf`;
 }
 
 export function buildShareMessage(form) {
