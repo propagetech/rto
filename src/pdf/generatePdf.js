@@ -25,7 +25,10 @@ export async function generatePdfFromElement(element) {
     windowHeight: element.scrollHeight
   });
 
-  const imgData = canvas.toDataURL("image/jpeg", 0.95);
+  // PNG (lossless) keeps the 1px rules crisp — JPEG adds block ringing around
+  // the hairlines that reads as uneven line thickness. For this black-on-white
+  // line-art the PNG is no larger than the 0.95 JPEG was.
+  const imgData = canvas.toDataURL("image/png");
 
   const pdf = new jsPDF({ orientation: "p", unit: "mm", format: "a4" });
   const pageWidth = pdf.internal.pageSize.getWidth();
@@ -46,7 +49,7 @@ export async function generatePdfFromElement(element) {
 
   const x = (pageWidth - imgWidth) / 2;
   const y = (pageHeight - imgHeight) / 2;
-  pdf.addImage(imgData, "JPEG", x, y, imgWidth, imgHeight);
+  pdf.addImage(imgData, "PNG", x, y, imgWidth, imgHeight);
 
   return pdf.output("blob");
 }

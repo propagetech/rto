@@ -6,6 +6,23 @@ function valueOrBlank(v) {
   return s.length ? s : " ";
 }
 
+const PDF_STAMP_MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+
+// Generation timestamp, e.g. 01-JAN-2026-02-30-AM. Computed at render; the
+// generate flow forces a fresh render right before capture, so it reflects
+// the moment the PDF is produced.
+function generatedStampForPdf() {
+  const d = new Date();
+  const day = String(d.getDate()).padStart(2, "0");
+  const mon = PDF_STAMP_MONTHS[d.getMonth()];
+  const year = d.getFullYear();
+  const hours24 = d.getHours();
+  const ampm = hours24 >= 12 ? "PM" : "AM";
+  const hours12 = String(hours24 % 12 || 12).padStart(2, "0");
+  const mins = String(d.getMinutes()).padStart(2, "0");
+  return `${day}-${mon}-${year}-${hours12}-${mins}-${ampm}`;
+}
+
 const PdfTemplate = forwardRef(function PdfTemplate({ form }, ref) {
   const vehicleClassDisplay =
     form.vehicleClass === "OTH" && form.vehicleClassOther
@@ -16,6 +33,7 @@ const PdfTemplate = forwardRef(function PdfTemplate({ form }, ref) {
   const isBlankForm = !String(form.applicantName ?? "").trim();
   const placeDisplay = isBlankForm ? "" : placeForPdf(form.place);
   const dateDisplay = isBlankForm ? "" : form.date;
+  const generatedStamp = isBlankForm ? "" : generatedStampForPdf();
 
   return (
     <div ref={ref} className="pdf-doc">
@@ -79,11 +97,11 @@ const PdfTemplate = forwardRef(function PdfTemplate({ form }, ref) {
         <table className={`pdf-table ${isBlankForm ? "pdf-table--blank" : ""}`}>
           <thead>
             <tr>
-              <th>{LABELS.vehicleNumber}</th>
-              <th>{LABELS.vehicleClass}</th>
-              <th>{LABELS.amount}</th>
-              <th>{LABELS.ddNumber}</th>
-              <th>{LABELS.bankName}</th>
+              <th><HeaderLabel text={LABELS.vehicleNumber} /></th>
+              <th><HeaderLabel text={LABELS.vehicleClass} /></th>
+              <th><HeaderLabel text={LABELS.amount} /></th>
+              <th><HeaderLabel text={LABELS.ddNumber} /></th>
+              <th><HeaderLabel text={LABELS.bankName} /></th>
             </tr>
           </thead>
           <tbody>
@@ -121,6 +139,8 @@ const PdfTemplate = forwardRef(function PdfTemplate({ form }, ref) {
           <div className="pdf-footer__sigCap">{LABELS.signatureCaption}</div>
         </div>
       </div>
+
+      {generatedStamp ? <div className="pdf-timestamp">{generatedStamp}</div> : null}
     </div>
   );
 });
@@ -158,8 +178,30 @@ function AddressRow({ no, label, line1, line2, line3 }) {
       <div className="pdf-field-row__no">{no ? `${no}.` : ""}</div>
       <div className="pdf-field-row__label">{label}</div>
       <div className="pdf-field-row__colon">:</div>
-      <div className="pdf-address-value">{text}</div>
+      <div className="pdf-address-value">
+        <div className="pdf-address-value__lines" aria-hidden="true">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="pdf-address-line" />
+          ))}
+        </div>
+        <div className="pdf-address-value__text">{text}</div>
+      </div>
     </div>
+  );
+}
+
+// Splits a header label into Kannada and Latin runs so the lighter Latin
+// glyphs (e.g. "NO") can be weighted up to visually match the Kannada.
+function HeaderLabel({ text }) {
+  const parts = String(text).split(/([A-Za-z]+)/);
+  return parts.map((part, i) =>
+    /^[A-Za-z]+$/.test(part) ? (
+      <span key={i} className="pdf-th-latin">
+        {part}
+      </span>
+    ) : (
+      part
+    )
   );
 }
 
