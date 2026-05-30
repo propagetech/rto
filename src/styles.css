@@ -452,6 +452,55 @@ body {
   gap: 12px;
 }
 
+/* Segmented chip selectors (vehicle class, amount) */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 12px 18px;
+  border: 2px solid var(--border-soft);
+  border-radius: 8px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  background: var(--input-bg);
+  color: var(--text);
+  cursor: pointer;
+  user-select: none;
+  transition: border-color 80ms ease, box-shadow 80ms ease, transform 80ms ease;
+}
+
+.chip input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+}
+
+.chip:hover {
+  border-color: var(--border);
+}
+
+.chip--on {
+  border-color: var(--border);
+  background: var(--primary);
+  color: var(--primary-contrast);
+  box-shadow: 3px 3px 0 var(--pop-shadow);
+  transform: translate(-1px, -1px);
+}
+
+.chip:has(input:focus-visible) {
+  outline: none;
+  box-shadow: 3px 3px 0 var(--primary);
+  transform: translate(-1px, -1px);
+}
+
 .checks {
   display: grid;
   gap: 12px;

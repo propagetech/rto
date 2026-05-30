@@ -1,5 +1,5 @@
 import { forwardRef } from "react";
-import { LABELS, phoneForPdf, placeForPdf, regNumberForPdf } from "../labels.js";
+import { LABELS, formatDateForPdf, phoneForPdf, placeForPdf, regNumberForPdf } from "../labels.js";
 
 function valueOrBlank(v) {
   const s = String(v ?? "").trim();
@@ -15,7 +15,7 @@ const PdfTemplate = forwardRef(function PdfTemplate({ form }, ref) {
   const requestedRegNumberDisplay = regNumberForPdf(form);
   const isBlankForm = !String(form.applicantName ?? "").trim();
   const placeDisplay = isBlankForm ? "" : placeForPdf(form.place);
-  const dateDisplay = isBlankForm ? "" : form.date;
+  const dateDisplay = isBlankForm ? "" : formatDateForPdf(form.date);
 
   return (
     <div ref={ref} className="pdf-doc">
@@ -126,7 +126,7 @@ const PdfTemplate = forwardRef(function PdfTemplate({ form }, ref) {
 });
 
 function RelationRow({ selected, name }) {
-  const opts = ["S/o", "W/o", "D/o"];
+  const opts = ["S/o", "W/o", "D/o", "N/A"];
   return (
     <div className="pdf-field-row pdf-field-row--indent">
       <div className="pdf-field-row__no" />

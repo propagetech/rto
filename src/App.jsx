@@ -19,6 +19,35 @@ import { generatePdfFromElement } from "./pdf/generatePdf.js";
 import PdfTemplate from "./pdf/PdfTemplate.jsx";
 import "./pdf/pdf-template.css";
 
+// Segmented chip selector used in place of a <select> for short, fixed option
+// sets (vehicle class, amount). Native radios keep keyboard/a11y behaviour and
+// work with the existing update() handler (it reads e.target.value).
+function RadioChips({ legendId, legend, name, options, value, onChange }) {
+  return (
+    <div className="field field--full" role="radiogroup" aria-labelledby={legendId}>
+      <span className="field__legend" id={legendId}>
+        {legend}
+      </span>
+      <div className="chips">
+        {options
+          .filter((opt) => opt.value !== "")
+          .map((opt) => (
+            <label key={opt.value} className={`chip ${value === opt.value ? "chip--on" : ""}`}>
+              <input
+                type="radio"
+                name={name}
+                value={opt.value}
+                checked={value === opt.value}
+                onChange={onChange}
+              />
+              <span>{opt.label}</span>
+            </label>
+          ))}
+      </div>
+    </div>
+  );
+}
+
 function todayISODate() {
   const now = new Date();
   const y = String(now.getFullYear());
@@ -585,16 +614,14 @@ export default function App() {
                   tabIndex={-1}
                 />
               </div>
-              <div className="field">
-                <label htmlFor="vehicleClass">{ui.vehicleClass}</label>
-                <select id="vehicleClass" value={form.vehicleClass} onChange={update("vehicleClass")}>
-                  {VEHICLE_CLASS_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <RadioChips
+                legendId="vehicleClass-label"
+                legend={ui.vehicleClass}
+                name="vehicleClass"
+                options={VEHICLE_CLASS_OPTIONS}
+                value={form.vehicleClass}
+                onChange={update("vehicleClass")}
+              />
               {form.vehicleClass === "OTH" ? (
                 <div className="field">
                   <label htmlFor="vehicleClassOther">{ui.vehicleClassOther}</label>
@@ -608,16 +635,14 @@ export default function App() {
                   />
                 </div>
               ) : null}
-              <div className="field">
-                <label htmlFor="amount">{ui.amount}</label>
-                <select id="amount" value={form.amount} onChange={update("amount")}>
-                  {AMOUNT_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <RadioChips
+                legendId="amount-label"
+                legend={ui.amount}
+                name="amount"
+                options={AMOUNT_OPTIONS}
+                value={form.amount}
+                onChange={update("amount")}
+              />
               <div className="field">
                 <label htmlFor="ddNumber">{ui.ddNumber}</label>
                 <input

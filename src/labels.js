@@ -144,6 +144,20 @@ export function generatedStampForPdf(d = new Date()) {
   return `${day}-${mon}-${year}-${hours12}-${mins}-${ampm}`;
 }
 
+const PDF_DATE_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+// Formats the ISO yyyy-mm-dd value from <input type="date"> as day-Mon-year,
+// e.g. "2026-03-31" -> "31-Mar-2026". Falls back to the raw value if it isn't
+// a plain ISO date.
+export function formatDateForPdf(value) {
+  const s = String(value || "").trim();
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
+  if (!m) return s;
+  const monIdx = Number(m[2]) - 1;
+  if (monIdx < 0 || monIdx > 11) return s;
+  return `${m[3]}-${PDF_DATE_MONTHS[monIdx]}-${m[1]}`;
+}
+
 export function buildPdfFileName(form) {
   const sanitize = (s) =>
     String(s || "")
@@ -173,7 +187,8 @@ export const RELATION_OPTIONS = [
   { value: "", label: "—" },
   { value: "S/o", label: "S/o" },
   { value: "W/o", label: "W/o" },
-  { value: "D/o", label: "D/o" }
+  { value: "D/o", label: "D/o" },
+  { value: "N/A", label: "N/A" }
 ];
 
 export const VEHICLE_CLASS_OPTIONS = [
